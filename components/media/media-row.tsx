@@ -11,9 +11,10 @@ interface MediaRowProps {
   title: string;
   items: MediaItem[];
   variant?: "poster" | "backdrop";
+  showRank?: boolean;
 }
 
-export const MediaRow = ({ title, items, variant = "poster" }: MediaRowProps) => {
+export const MediaRow = ({ title, items, variant = "poster", showRank = false }: MediaRowProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const handleScroll = (direction: "left" | "right") => {
@@ -57,12 +58,12 @@ export const MediaRow = ({ title, items, variant = "poster" }: MediaRowProps) =>
         ref={scrollRef}
         className="scrollbar-none -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 md:mx-0 md:px-0"
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div
             key={`${title}-${item.mediaType}-${item.id}`}
             className={variant === "poster" ? "w-[42vw] shrink-0 snap-start sm:w-48" : "w-[76vw] shrink-0 snap-start sm:w-80"}
           >
-            <MediaCard item={item} variant={variant} />
+            <MediaCard item={item} variant={variant} rank={showRank ? index + 1 : undefined} />
           </div>
         ))}
       </div>

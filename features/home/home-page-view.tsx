@@ -38,7 +38,8 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
           key={rail.id}
           title={rail.title}
           items={rail.items}
-          variant={index <= 1 ? "backdrop" : "poster"}
+          showRank={rail.id === "top-10"}
+          variant={rail.id === "top-10" ? "poster" : index <= 2 ? "backdrop" : "poster"}
         />
       ))}
     </div>

@@ -47,6 +47,37 @@ const formatReleaseDate = (date: string | null) => {
   }).format(parsed);
 };
 
+const CREW_PRIORITY = [
+  "Director",
+  "Creator",
+  "Screenplay",
+  "Writer",
+  "Executive Producer",
+  "Producer",
+];
+
+const getCrewHighlights = (detail: MediaDetail) =>
+  detail.crew
+    .slice()
+    .sort((a, b) => {
+      const aIndex = CREW_PRIORITY.indexOf(a.job);
+      const bIndex = CREW_PRIORITY.indexOf(b.job);
+      const aRank = aIndex === -1 ? Number.MAX_SAFE_INTEGER : aIndex;
+      const bRank = bIndex === -1 ? Number.MAX_SAFE_INTEGER : bIndex;
+
+      if (aRank === bRank) {
+        return a.name.localeCompare(b.name);
+      }
+
+      return aRank - bRank;
+    })
+    .filter(
+      (member, index, crew) =>
+        crew.findIndex((candidate) => candidate.name === member.name && candidate.job === member.job) ===
+        index,
+    )
+    .slice(0, 8);
+
 export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
   if (!detail) {
     return (
@@ -68,6 +99,7 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
     (video) => video.type.toLowerCase() === "trailer" && video.site.toLowerCase() === "youtube",
   );
   const director = detail.crew.find((member) => member.job === "Director");
+  const crewHighlights = getCrewHighlights(detail);
   const releaseLabel = formatReleaseDate(detail.releaseDate);
   const runtimeLabel = formatRuntime(detail.runtime);
 
@@ -172,16 +204,35 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
 
       <SectionShell title="Genres">
         <div className="flex flex-wrap gap-2">
-          {detail.genres.map((genre) => (
-            <Badge key={genre.id}>{genre.name}</Badge>
-          ))}
+          {detail.genres.length > 0 ? (
+            detail.genres.map((genre) => <Badge key={genre.id}>{genre.name}</Badge>)
+          ) : (
+            <p className="text-sm text-text-400">Genre data unavailable for this title.</p>
+          )}
         </div>
       </SectionShell>
 
       <CastGrid cast={detail.cast} />
 
+      {crewHighlights.length > 0 ? (
+        <SectionShell title="Crew Highlights">
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            {crewHighlights.map((member) => (
+              <li key={`${member.id}-${member.job}`} className="glass-surface rounded-xl p-3">
+                <p className="line-clamp-1 text-sm font-semibold text-text-50">{member.name}</p>
+                <p className="line-clamp-1 text-xs text-text-400">{member.job}</p>
+              </li>
+            ))}
+          </ul>
+        </SectionShell>
+      ) : null}
+
       {detail.similar.length > 0 ? (
         <MediaRow title="Similar Titles" items={detail.similar} variant="poster" />
+      ) : null}
+
+      {detail.recommendations.length > 0 ? (
+        <MediaRow title="Recommended For You" items={detail.recommendations} variant="poster" />
       ) : null}
     </article>
   );

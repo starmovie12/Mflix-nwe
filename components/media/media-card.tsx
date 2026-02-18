@@ -13,6 +13,7 @@ interface MediaCardProps {
   item: MediaItem;
   variant?: "poster" | "backdrop";
   className?: string;
+  rank?: number;
 }
 
 const getReleaseYear = (releaseDate: string | null) => {
@@ -24,8 +25,9 @@ const getReleaseYear = (releaseDate: string | null) => {
   return Number.isNaN(year) ? null : year;
 };
 
-export const MediaCard = ({ item, variant = "poster", className }: MediaCardProps) => {
+export const MediaCard = ({ item, variant = "poster", className, rank }: MediaCardProps) => {
   const shouldReduceMotion = useReducedMotion();
+  const hasRank = typeof rank === "number" && Number.isInteger(rank) && rank > 0 && variant === "poster";
   const imageSrc =
     variant === "poster"
       ? getPosterUrl(item.posterPath, "w500")
@@ -40,8 +42,16 @@ export const MediaCard = ({ item, variant = "poster", className }: MediaCardProp
     <motion.article
       whileHover={shouldReduceMotion ? undefined : { y: -6, scale: 1.03 }}
       transition={{ type: "spring", stiffness: 240, damping: 22, mass: 0.8 }}
-      className={cn("group relative", className)}
+      className={cn("group relative", hasRank && "pl-6 sm:pl-8", className)}
     >
+      {hasRank ? (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute bottom-1 left-0 z-10 font-display text-7xl font-black leading-none text-white/80 drop-shadow-[0_8px_20px_rgba(0,0,0,0.7)] sm:text-8xl"
+        >
+          {rank}
+        </span>
+      ) : null}
       <Link
         href={`/title/${item.mediaType}/${item.id}`}
         className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-950"
