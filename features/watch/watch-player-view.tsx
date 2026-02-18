@@ -3,15 +3,12 @@
 import Link from "next/link";
 import {
   ArrowLeft,
-  Expand,
   FastForward,
   Maximize,
   Minimize,
   Pause,
   Play,
   Rewind,
-  Settings,
-  SkipForward,
   Subtitles,
   Volume2,
   VolumeX,

@@ -3,9 +3,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
-import { Play, Plus, Star } from "lucide-react";
+import { Play, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { MyListButton } from "@/components/media/my-list-button";
 import { cn } from "@/lib/cn";
 import { getBackdropUrl, getPosterUrl } from "@/lib/tmdb/images";
 import type { MediaItem } from "@/types/media";
@@ -105,14 +106,7 @@ export const MediaCard = ({ item, variant = "poster", rank, className, index = 0
               >
                 <Play className="h-4 w-4 fill-current" />
               </button>
-              <button
-                type="button"
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-white/30 bg-black/50 text-white transition hover:border-white hover:bg-black/70"
-                aria-label={`Add ${item.title} to My List`}
-                onClick={(e) => e.preventDefault()}
-              >
-                <Plus className="h-4 w-4" />
-              </button>
+              <MyListButton item={item} iconOnly />
             </div>
 
             <p className="line-clamp-1 text-sm font-semibold text-white">{item.title}</p>

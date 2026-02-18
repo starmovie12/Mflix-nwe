@@ -9,7 +9,6 @@ import {
   Globe,
   Link2,
   Play,
-  Plus,
   Share2,
   Star,
   Tv,
@@ -20,6 +19,7 @@ import { CastGrid } from "@/components/media/cast-grid";
 import { GenreChips } from "@/components/media/genre-chips";
 import { ImageGallery } from "@/components/media/image-gallery";
 import { MediaRow } from "@/components/media/media-row";
+import { MyListButton } from "@/components/media/my-list-button";
 import { TrailerModal } from "@/components/media/trailer-modal";
 import { VideoCarousel } from "@/components/media/video-carousel";
 import { Badge } from "@/components/ui/badge";
@@ -234,10 +234,7 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
                   Play
                 </Link>
               )}
-              <Button variant="secondary" size="lg">
-                <Plus className="h-5 w-5" />
-                My List
-              </Button>
+              <MyListButton item={detail} size="lg" />
               <Button variant="outline" size="icon" onClick={handleShare} aria-label="Share">
                 <Share2 className="h-4 w-4" />
               </Button>
