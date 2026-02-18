@@ -72,7 +72,7 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
   const runtimeLabel = formatRuntime(detail.runtime);
 
   return (
-    <article className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
+    <article className="space-y-10 pb-16 pt-28 md:space-y-12 md:pt-32">
       <nav
         aria-label="Breadcrumb"
         className="flex items-center gap-2 text-xs uppercase tracking-wide text-text-400"

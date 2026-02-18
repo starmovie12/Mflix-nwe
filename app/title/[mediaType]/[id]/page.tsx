@@ -92,6 +92,10 @@ export default async function TitleDetailPage({ params }: TitlePageProps) {
 
   const detail = await getMediaDetail(parsed.mediaType, parsed.id);
 
+  if (!detail) {
+    notFound();
+  }
+
   return (
     <main className="app-shell">
       <TitleDetailView detail={detail} />

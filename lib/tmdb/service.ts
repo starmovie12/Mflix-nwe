@@ -15,7 +15,7 @@ import {
 } from "./types";
 
 export interface HomePageData {
-  featured: MediaItem | null;
+  featured: MediaDetail | null;
   rails: MediaRail[];
   hasData: boolean;
   errorMessage: string | null;
@@ -180,8 +180,14 @@ export const getHomePageData = async (): Promise<HomePageData> => {
     },
   ].filter((rail) => rail.items.length > 0);
 
-  const featured = rails.find((rail) => rail.items.length > 0)?.items[0] ?? null;
+  const featuredItem = rails.find((rail) => rail.items.length > 0)?.items[0] ?? null;
   const hasData = rails.length > 0;
+
+  let featured: MediaDetail | null = null;
+  if (featuredItem) {
+    const detail = await getMediaDetail(featuredItem.mediaType, featuredItem.id);
+    featured = detail;
+  }
 
   const firstRequestError =
     [

@@ -11,7 +11,12 @@ interface HomePageViewProps {
 }
 
 export const HomePageView = ({ data }: HomePageViewProps) => {
-  if (!data.hasData || !data.featured) {
+  const featured =
+    data.featured ??
+    data.rails.find((r) => r.items.length > 0)?.items[0] ??
+    null;
+
+  if (!data.hasData || !featured) {
     return (
       <div className="pb-16 pt-28">
         <EmptyState
@@ -31,8 +36,8 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
   }
 
   return (
-    <div className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
-      <Billboard item={data.featured} />
+    <div className="space-y-10 pb-16 pt-28 md:space-y-12 md:pt-32">
+      <Billboard item={featured} />
       {data.rails.map((rail, index) => (
         <MediaRow
           key={rail.id}

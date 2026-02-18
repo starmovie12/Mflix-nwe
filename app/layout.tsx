@@ -19,23 +19,33 @@ const sora = Sora({
 export const metadata: Metadata = {
   metadataBase: new URL("https://mflix.example"),
   title: {
-    default: `${APP_NAME} - Stream Movies & TV`,
+    default: `${APP_NAME} - Watch Free HD Movies, Series & Anime Online`,
     template: `%s | ${APP_NAME}`,
   },
   description:
-    "MFLIX is a premium OTT discovery experience inspired by Netflix, Prime Video, and Disney+ Hotstar.",
+    "Stream the latest HD Movies, Web Series, and Anime on MFLIX. Premium OTT experience with daily updates, cinematic browsing, and rich detail pages.",
+  keywords: [
+    "free movies",
+    "watch online",
+    "hd movies",
+    "web series",
+    "anime",
+    "mflix",
+    "streaming",
+    "bollywood",
+    "hollywood",
+  ],
   openGraph: {
-    title: `${APP_NAME} - Stream Movies & TV`,
+    title: `${APP_NAME} - Free HD Movies & Series`,
     description:
-      "Explore trending movies and TV shows with cinematic browsing, rich detail pages, and premium UI.",
+      "Watch thousands of movies and series in HD quality. Join MFLIX today.",
     type: "website",
     siteName: APP_NAME,
   },
   twitter: {
     card: "summary_large_image",
-    title: `${APP_NAME} - Stream Movies & TV`,
-    description:
-      "Explore trending movies and TV shows with cinematic browsing, rich detail pages, and premium UI.",
+    title: `${APP_NAME} - Watch Movies Online`,
+    description: "Stream latest movies and anime for free.",
   },
 };
 
