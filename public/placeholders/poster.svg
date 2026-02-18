@@ -1,0 +1,22 @@
+<svg width="600" height="900" viewBox="0 0 600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0B0D14"/>
+      <stop offset="1" stop-color="#101326"/>
+    </linearGradient>
+    <radialGradient id="r" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(140 180) rotate(55) scale(520 420)">
+      <stop stop-color="#E50914" stop-opacity="0.18"/>
+      <stop offset="1" stop-color="#E50914" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="900" rx="28" fill="url(#g)"/>
+  <rect width="600" height="900" rx="28" fill="url(#r)"/>
+  <g opacity="0.9">
+    <path d="M220 455c0-44.183 35.817-80 80-80h0c44.183 0 80 35.817 80 80v0c0 44.183-35.817 80-80 80h0c-44.183 0-80-35.817-80-80v0Z" fill="rgba(255,255,255,0.06)"/>
+    <path d="M292 420l68 40-68 40v-80Z" fill="rgba(255,255,255,0.22)"/>
+  </g>
+  <text x="50%" y="86%" text-anchor="middle" fill="rgba(255,255,255,0.42)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI" font-size="22" font-weight="600">
+    MFLIX
+  </text>
+</svg>
+

@@ -1,0 +1,19 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1280" y2="720" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#05060A"/>
+      <stop offset="1" stop-color="#101326"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(220 140) rotate(52) scale(820 520)">
+      <stop stop-color="#FF2D55" stop-opacity="0.14"/>
+      <stop offset="1" stop-color="#FF2D55" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1280" height="720" rx="44" fill="url(#bg)"/>
+  <rect width="1280" height="720" rx="44" fill="url(#glow)"/>
+  <path d="M0 520c180-120 360-150 540-90 180 60 360 40 740-90v380H0V520Z" fill="rgba(255,255,255,0.04)"/>
+  <text x="50%" y="52%" text-anchor="middle" fill="rgba(255,255,255,0.36)" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI" font-size="40" font-weight="700">
+    MFLIX
+  </text>
+</svg>
+
