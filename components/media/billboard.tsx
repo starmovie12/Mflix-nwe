@@ -1,6 +1,10 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import { Info, Play } from "lucide-react";
+import { Info, Play, Star, Volume2, VolumeX } from "lucide-react";
+import { motion, useReducedMotion } from "framer-motion";
+import { useState } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button";
@@ -9,51 +13,106 @@ import type { MediaItem } from "@/types/media";
 
 interface BillboardProps {
   item: MediaItem;
+  trailerKey?: string;
 }
 
-export const Billboard = ({ item }: BillboardProps) => (
-  <section className="relative isolate overflow-hidden rounded-2xl border border-white/10 shadow-card">
-    <Image
-      src={getBackdropUrl(item.backdropPath, "w1280")}
-      alt={item.title}
-      fill
-      priority
-      sizes="(max-width: 1200px) 100vw, 1400px"
-      className="object-cover"
-    />
-    <div className="absolute inset-0 bg-hero-fade" />
-    <div className="absolute inset-0 bg-gradient-to-r from-surface-950/80 via-surface-950/30 to-transparent" />
+export const Billboard = ({ item, trailerKey }: BillboardProps) => {
+  const shouldReduceMotion = useReducedMotion();
+  const [isMuted, setIsMuted] = useState(true);
+  const [showTrailer, setShowTrailer] = useState(false);
 
-    <div className="relative z-10 flex min-h-[68vh] flex-col justify-end gap-5 p-6 md:min-h-[72vh] md:p-10">
-      <div className="flex flex-wrap items-center gap-2">
-        <Badge className="bg-brand-500/20 text-white">{item.mediaType.toUpperCase()}</Badge>
-        {item.voteAverage > 0 ? <Badge>{item.voteAverage.toFixed(1)} Rating</Badge> : null}
-      </div>
+  const handlePlayTrailer = () => {
+    if (trailerKey) setShowTrailer(true);
+  };
 
-      <h1 className="max-w-2xl font-display text-4xl font-semibold tracking-tight text-white md:text-6xl">
-        {item.title}
-      </h1>
+  return (
+    <section
+      className="relative isolate -mx-4 overflow-hidden md:-mx-8 lg:-mx-12 lg:rounded-2xl lg:mx-0 lg:border lg:border-white/10 lg:shadow-card"
+      aria-label="Featured title"
+    >
+      <div className="relative min-h-[75vh] md:min-h-[80vh]">
+        {showTrailer && trailerKey ? (
+          <div className="absolute inset-0 z-[2]">
+            <iframe
+              src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=1&mute=${isMuted ? 1 : 0}&controls=0&showinfo=0&rel=0&loop=1&playlist=${trailerKey}`}
+              className="h-full w-full"
+              allow="autoplay; encrypted-media"
+              allowFullScreen
+              title={`${item.title} trailer`}
+            />
+          </div>
+        ) : (
+          <Image
+            src={getBackdropUrl(item.backdropPath, "w1280")}
+            alt={item.title}
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+        )}
 
-      <p className="max-w-xl text-sm text-text-200 md:text-base">
-        {item.overview || "Discover your next favorite title on MFLIX."}
-      </p>
+        <div className="absolute inset-0 z-[3] bg-hero-fade" />
+        <div className="absolute inset-0 z-[3] bg-gradient-to-r from-surface-950/90 via-surface-950/40 to-transparent" />
+        <div className="absolute inset-0 z-[3] bg-hero-vignette opacity-40" />
 
-      <div className="flex flex-wrap gap-3">
-        <Link
-          href={`/title/${item.mediaType}/${item.id}`}
-          className={buttonClassName({ variant: "primary", size: "lg" })}
+        <motion.div
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 30 }}
+          animate={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+          className="absolute inset-0 z-[4] flex flex-col justify-end gap-4 p-6 md:gap-5 md:p-10 lg:p-14"
         >
-          <Play className="h-5 w-5 fill-current" />
-          Play
-        </Link>
-        <Link
-          href={`/title/${item.mediaType}/${item.id}`}
-          className={buttonClassName({ variant: "secondary", size: "lg" })}
-        >
-          <Info className="h-5 w-5" />
-          More Info
-        </Link>
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge variant="brand">{item.mediaType === "tv" ? "TV SERIES" : "MOVIE"}</Badge>
+            {item.voteAverage > 0 && (
+              <Badge variant="gold" className="gap-1">
+                <Star className="h-3 w-3 fill-current" />
+                {item.voteAverage.toFixed(1)}
+              </Badge>
+            )}
+            <Badge variant="outline">HD</Badge>
+          </div>
+
+          <h1 className="max-w-3xl font-display text-3xl font-bold tracking-tight text-white drop-shadow-lg sm:text-4xl md:text-5xl lg:text-6xl">
+            {item.title}
+          </h1>
+
+          {item.overview && (
+            <p className="max-w-xl text-sm text-text-200 line-clamp-3 md:text-base md:line-clamp-3 lg:max-w-2xl">
+              {item.overview}
+            </p>
+          )}
+
+          <div className="flex flex-wrap items-center gap-3 pt-1">
+            <Link
+              href={`/title/${item.mediaType}/${item.id}`}
+              className={buttonClassName({ variant: "primary", size: "lg" })}
+              onClick={handlePlayTrailer}
+            >
+              <Play className="h-5 w-5 fill-current" />
+              Play
+            </Link>
+            <Link
+              href={`/title/${item.mediaType}/${item.id}`}
+              className={buttonClassName({ variant: "secondary", size: "lg" })}
+            >
+              <Info className="h-5 w-5" />
+              More Info
+            </Link>
+
+            {showTrailer && trailerKey && (
+              <button
+                type="button"
+                onClick={() => setIsMuted(!isMuted)}
+                className="ml-auto inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/30 bg-black/40 text-white transition hover:bg-black/60"
+                aria-label={isMuted ? "Unmute trailer" : "Mute trailer"}
+              >
+                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+              </button>
+            )}
+          </div>
+        </motion.div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};

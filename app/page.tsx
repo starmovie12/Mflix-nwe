@@ -7,7 +7,7 @@ export default async function HomePage() {
   const data = await getHomePageData();
 
   return (
-    <main className="app-shell">
+    <main className="app-shell pt-16">
       <HomePageView data={data} />
     </main>
   );

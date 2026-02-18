@@ -16,27 +16,19 @@ interface TitlePageProps {
 
 export const revalidate = 60 * 10;
 
-const isMediaType = (value: string): value is MediaType => value === "movie" || value === "tv";
+const isMediaType = (value: string): value is MediaType =>
+  value === "movie" || value === "tv";
 
 const parseId = (value: string) => {
   const parsed = Number(value);
-  if (!Number.isInteger(parsed) || parsed <= 0) {
-    return null;
-  }
-
+  if (!Number.isInteger(parsed) || parsed <= 0) return null;
   return parsed;
 };
 
 const parseParams = ({ mediaType, id }: TitlePageProps["params"]) => {
-  if (!isMediaType(mediaType)) {
-    return null;
-  }
-
+  if (!isMediaType(mediaType)) return null;
   const parsedId = parseId(id);
-  if (!parsedId) {
-    return null;
-  }
-
+  if (!parsedId) return null;
   return { mediaType, id: parsedId };
 };
 
@@ -66,29 +58,27 @@ export async function generateMetadata({ params }: TitlePageProps): Promise<Meta
       canonical: `/title/${detail.mediaType}/${detail.id}`,
     },
     openGraph: {
-      title: detail.title,
+      title: `${detail.title} - ${APP_NAME}`,
       description: overview,
-      images: [
-        {
-          url: getBackdropUrl(detail.backdropPath, "w1280"),
-          alt: detail.title,
-        },
-      ],
+      type: detail.mediaType === "tv" ? "video.tv_show" : "video.movie",
+      images: detail.backdropPath
+        ? [{ url: getBackdropUrl(detail.backdropPath, "w1280"), alt: detail.title }]
+        : [],
     },
     twitter: {
       card: "summary_large_image",
-      title: detail.title,
+      title: `${detail.title} - ${APP_NAME}`,
       description: overview,
-      images: [getBackdropUrl(detail.backdropPath, "w1280")],
+      images: detail.backdropPath
+        ? [getBackdropUrl(detail.backdropPath, "w1280")]
+        : [],
     },
   };
 }
 
 export default async function TitleDetailPage({ params }: TitlePageProps) {
   const parsed = parseParams(params);
-  if (!parsed) {
-    notFound();
-  }
+  if (!parsed) notFound();
 
   const detail = await getMediaDetail(parsed.mediaType, parsed.id);
 

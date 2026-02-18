@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { motion, useReducedMotion } from "framer-motion";
 
 import { Billboard } from "@/components/media/billboard";
 import { MediaRow } from "@/components/media/media-row";
@@ -11,6 +14,8 @@ interface HomePageViewProps {
 }
 
 export const HomePageView = ({ data }: HomePageViewProps) => {
+  const shouldReduceMotion = useReducedMotion();
+
   if (!data.hasData || !data.featured) {
     return (
       <div className="pb-16 pt-28">
@@ -31,15 +36,27 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
   }
 
   return (
-    <div className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
+    <div className="space-y-8 pb-16 pt-0 md:space-y-12 md:pt-0">
       <Billboard item={data.featured} />
+
       {data.rails.map((rail, index) => (
-        <MediaRow
+        <motion.div
           key={rail.id}
-          title={rail.title}
-          items={rail.items}
-          variant={index <= 1 ? "backdrop" : "poster"}
-        />
+          initial={shouldReduceMotion ? undefined : { opacity: 0, y: 24 }}
+          whileInView={shouldReduceMotion ? undefined : { opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{
+            duration: 0.5,
+            delay: Math.min(index * 0.08, 0.3),
+            ease: [0.25, 0.46, 0.45, 0.94],
+          }}
+        >
+          <MediaRow
+            title={rail.title}
+            items={rail.items}
+            variant={rail.variant === "top10" ? "top10" : rail.variant ?? "poster"}
+          />
+        </motion.div>
       ))}
     </div>
   );

@@ -2,9 +2,20 @@
   --mflix-bg: #070b14;
   --mflix-surface: #0e1322;
   --mflix-surface-strong: #1a2033;
-  --mflix-border: rgba(156, 168, 195, 0.25);
+  --mflix-surface-hover: #252d43;
+  --mflix-border: rgba(156, 168, 195, 0.18);
+  --mflix-border-strong: rgba(156, 168, 195, 0.35);
   --mflix-text: #f4f7ff;
   --mflix-text-muted: #9ca8c3;
+  --mflix-text-dim: #7a8aa8;
   --mflix-brand: #e50914;
   --mflix-brand-soft: #f3303c;
+  --mflix-brand-glow: rgba(229, 9, 20, 0.25);
+  --mflix-gold: #ffc107;
+  --mflix-radius-sm: 0.5rem;
+  --mflix-radius-md: 0.75rem;
+  --mflix-radius-lg: 1rem;
+  --mflix-radius-xl: 1.5rem;
+  --mflix-shadow-card: 0 14px 42px rgba(6, 10, 20, 0.42);
+  --mflix-transition: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }

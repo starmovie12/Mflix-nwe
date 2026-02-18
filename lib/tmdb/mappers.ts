@@ -2,6 +2,7 @@ import type {
   CastMember,
   CrewMember,
   MediaDetail,
+  MediaImage,
   MediaItem,
   MediaType,
   MediaVideo,
@@ -20,7 +21,6 @@ const toMediaType = (input: string | undefined, fallback?: MediaType): MediaType
   if (isSupportedMediaType(input)) {
     return input;
   }
-
   return fallback ?? null;
 };
 
@@ -28,7 +28,6 @@ const roundVote = (value: number | undefined) => {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return 0;
   }
-
   return Number(value.toFixed(1));
 };
 
@@ -53,6 +52,7 @@ export const mapListItemToMedia = (
     releaseDate: item.release_date ?? item.first_air_date ?? null,
     voteAverage: roundVote(item.vote_average),
     genreIds: item.genre_ids ?? [],
+    originalLanguage: item.original_language,
   };
 };
 
@@ -78,6 +78,23 @@ const mapVideos = (
       official: video.official ?? false,
     }));
 
+const mapImages = (
+  images: TmdbMovieDetailResponse["images"] | TmdbTvDetailResponse["images"] | undefined,
+): { backdrops: MediaImage[]; posters: MediaImage[] } => ({
+  backdrops: (images?.backdrops ?? []).map((img) => ({
+    aspectRatio: img.aspect_ratio,
+    filePath: img.file_path,
+    width: img.width,
+    height: img.height,
+  })),
+  posters: (images?.posters ?? []).map((img) => ({
+    aspectRatio: img.aspect_ratio,
+    filePath: img.file_path,
+    width: img.width,
+    height: img.height,
+  })),
+});
+
 const mapCast = (
   cast: TmdbMovieDetailResponse["credits"] | TmdbTvDetailResponse["credits"],
 ): CastMember[] =>
@@ -86,6 +103,7 @@ const mapCast = (
     name: member.name,
     character: member.character ?? null,
     profilePath: member.profile_path ?? null,
+    order: member.order,
   }));
 
 const mapCrew = (
@@ -95,6 +113,7 @@ const mapCrew = (
     id: member.id,
     name: member.name,
     job: member.job ?? "Unknown",
+    department: member.department,
     profilePath: member.profile_path ?? null,
   }));
 
@@ -108,11 +127,13 @@ export const mapMovieDetail = (movie: TmdbMovieDetailResponse): MediaDetail => (
   releaseDate: movie.release_date ?? null,
   voteAverage: roundVote(movie.vote_average),
   genreIds: movie.genres.map((genre) => genre.id),
+  originalLanguage: movie.original_language,
   genres: movie.genres,
   runtime: movie.runtime ?? null,
   status: movie.status ?? null,
   tagline: movie.tagline ?? null,
   videos: mapVideos(movie.videos),
+  images: mapImages(movie.images),
   cast: mapCast(movie.credits),
   crew: mapCrew(movie.credits),
   similar: movie.similar ? mapPaginatedListToMedia(movie.similar, "movie") : [],
@@ -131,13 +152,17 @@ export const mapTvDetail = (tv: TmdbTvDetailResponse): MediaDetail => ({
   releaseDate: tv.first_air_date ?? null,
   voteAverage: roundVote(tv.vote_average),
   genreIds: tv.genres.map((genre) => genre.id),
+  originalLanguage: tv.original_language,
   genres: tv.genres,
   runtime: tv.episode_run_time && tv.episode_run_time.length > 0 ? tv.episode_run_time[0] : null,
   status: tv.status ?? null,
   tagline: tv.tagline ?? null,
   videos: mapVideos(tv.videos),
+  images: mapImages(tv.images),
   cast: mapCast(tv.credits),
   crew: mapCrew(tv.credits),
   similar: tv.similar ? mapPaginatedListToMedia(tv.similar, "tv") : [],
   recommendations: tv.recommendations ? mapPaginatedListToMedia(tv.recommendations, "tv") : [],
+  numberOfSeasons: tv.number_of_seasons,
+  numberOfEpisodes: tv.number_of_episodes,
 });
