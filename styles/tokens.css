@@ -1,0 +1,10 @@
+:root {
+  --mflix-bg: #070b14;
+  --mflix-surface: #0e1322;
+  --mflix-surface-strong: #1a2033;
+  --mflix-border: rgba(156, 168, 195, 0.25);
+  --mflix-text: #f4f7ff;
+  --mflix-text-muted: #9ca8c3;
+  --mflix-brand: #e50914;
+  --mflix-brand-soft: #f3303c;
+}
