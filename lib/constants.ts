@@ -12,3 +12,5 @@ export const FALLBACK_IMAGES = {
   poster: "/images/poster-placeholder.svg",
   backdrop: "/images/backdrop-placeholder.svg",
 } as const;
+
+export const SITE_URL = "https://mflix.example";
