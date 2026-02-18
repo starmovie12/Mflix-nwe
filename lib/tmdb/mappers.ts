@@ -39,13 +39,15 @@ export function mapVideos(videos: unknown): TitleVideo[] {
       if (!v || typeof v !== "object") return null;
       const vv = v as Record<string, unknown>;
       if (typeof vv.key !== "string" || typeof vv.name !== "string") return null;
-      return {
+      const official = typeof vv.official === "boolean" ? vv.official : undefined;
+      const mapped: TitleVideo = {
         key: vv.key,
         name: vv.name,
         site: typeof vv.site === "string" ? vv.site : "YouTube",
         type: typeof vv.type === "string" ? vv.type : "Video",
-        official: typeof vv.official === "boolean" ? vv.official : undefined
-      } satisfies TitleVideo;
+        ...(official === undefined ? {} : { official })
+      };
+      return mapped;
     })
     .filter((x): x is TitleVideo => Boolean(x));
 }

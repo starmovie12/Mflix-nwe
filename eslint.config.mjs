@@ -1,0 +1,18 @@
+import nextPlugin from "@next/eslint-plugin-next";
+import tseslint from "typescript-eslint";
+
+export default [
+  {
+    ignores: [
+      ".next/**",
+      "node_modules/**",
+      "out/**",
+      "coverage/**",
+      "playwright-report/**",
+      "test-results/**"
+    ]
+  },
+  ...tseslint.configs.recommended,
+  nextPlugin.configs["core-web-vitals"]
+];
+

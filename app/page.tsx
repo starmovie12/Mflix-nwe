@@ -6,7 +6,7 @@ import { getHomePageData, getTitleTrailer } from "@/lib/tmdb/api";
 import { withTitleImages } from "@/lib/tmdb/presentation";
 import type { TitleVideo } from "@/lib/tmdb/types";
 
-export const revalidate = 60 * 10;
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   try {
