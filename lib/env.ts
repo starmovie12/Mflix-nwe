@@ -22,8 +22,11 @@ if (!parsedEnv.success) {
 
 export const env = parsedEnv.data;
 
+export const hasTmdbApiKey = () =>
+  typeof env.TMDB_API_KEY === "string" && env.TMDB_API_KEY.length > 0;
+
 export const requireTmdbApiKey = () => {
-  if (!env.TMDB_API_KEY) {
+  if (!hasTmdbApiKey()) {
     throw new Error(
       "TMDB_API_KEY is missing. Add it to .env.local to enable TMDB data fetching.",
     );

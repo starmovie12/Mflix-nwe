@@ -31,6 +31,9 @@ NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
 NEXT_PUBLIC_APP_NAME=MFLIX
 ```
 
+For Vercel deployments, add the same variables in:
+**Project Settings -> Environment Variables** (Production + Preview).
+
 ## 3) Run the app
 
 ```bash

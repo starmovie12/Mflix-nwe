@@ -1,4 +1,5 @@
 import type { MediaDetail, MediaItem, MediaRail, MediaType } from "@/types/media";
+import { hasTmdbApiKey } from "@/lib/env";
 
 import { tmdbRequest } from "./client";
 import { tmdbEndpoints } from "./endpoints";
@@ -20,18 +21,27 @@ export interface HomePageData {
   errorMessage: string | null;
 }
 
+const MISSING_KEY_MESSAGE =
+  "TMDB_API_KEY is not configured. Add it in .env.local (local) or Vercel Project Settings -> Environment Variables.";
+
 const safeRequest = async <T>(promise: Promise<T>): Promise<T | null> => {
   try {
     return await promise;
-  } catch (error) {
-    const message =
-      error instanceof Error ? error.message : "Unknown error while requesting TMDB";
-    console.error(`[TMDB] ${message}`);
+  } catch {
     return null;
   }
 };
 
 export const getHomePageData = async (): Promise<HomePageData> => {
+  if (!hasTmdbApiKey()) {
+    return {
+      featured: null,
+      rails: [],
+      hasData: false,
+      errorMessage: MISSING_KEY_MESSAGE,
+    };
+  }
+
   const [
     trendingToday,
     trendingWeek,
@@ -132,7 +142,7 @@ export const getHomePageData = async (): Promise<HomePageData> => {
     hasData,
     errorMessage: hasData
       ? null
-      : "TMDB data is currently unavailable. Add TMDB_API_KEY in .env.local and try again.",
+      : "TMDB data is currently unavailable right now. Please try again in a few moments.",
   };
 };
 
@@ -140,6 +150,10 @@ export const getMediaDetail = async (
   mediaType: MediaType,
   id: number,
 ): Promise<MediaDetail | null> => {
+  if (!hasTmdbApiKey()) {
+    return null;
+  }
+
   if (mediaType === "movie") {
     const movie = await safeRequest(
       tmdbRequest({
