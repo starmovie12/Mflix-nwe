@@ -30,6 +30,10 @@ const getUserFriendlyTmdbErrorMessage = (error: unknown) => {
       return "TMDB_API_KEY appears invalid. Use your TMDB v3 API key in environment variables and redeploy.";
     }
 
+    if (error.status === 404) {
+      return "TMDB endpoint not found (404). Verify TMDB_BASE_URL is exactly https://api.themoviedb.org/3.";
+    }
+
     if (error.status === 429) {
       return "TMDB rate limit reached. Please retry after a short while.";
     }

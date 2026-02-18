@@ -32,9 +32,15 @@ const wait = async (ms: number) =>
     setTimeout(resolve, ms);
   });
 
+const createTmdbRequestUrl = (baseUrl: string, endpointPath: string) => {
+  const normalizedBaseUrl = baseUrl.endsWith("/") ? baseUrl : `${baseUrl}/`;
+  const normalizedPath = endpointPath.replace(/^\/+/, "");
+  return new URL(normalizedPath, normalizedBaseUrl);
+};
+
 const buildTmdbUrl = (endpoint: TmdbEndpoint) => {
   const apiKey = requireTmdbApiKey();
-  const url = new URL(endpoint.path, env.TMDB_BASE_URL);
+  const url = createTmdbRequestUrl(env.TMDB_BASE_URL, endpoint.path);
 
   url.searchParams.set("api_key", apiKey);
 
