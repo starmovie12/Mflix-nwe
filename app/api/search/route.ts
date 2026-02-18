@@ -39,39 +39,36 @@ export async function GET(request: Request) {
       schema: tmdbPaginatedListSchema,
     });
 
-    const items: SearchItem[] = response.results.flatMap((item) => {
+    const items = response.results.reduce<SearchItem[]>((accumulator, item) => {
       if (item.media_type === "person") {
         const extra = item as Record<string, unknown>;
         const profilePathValue = extra.profile_path;
         const knownForDepartmentValue = extra.known_for_department;
 
-        return [
-          {
-            kind: "person",
-            value: {
-              id: item.id,
-              mediaType: "person",
-              name: item.name ?? item.title ?? "Unknown person",
-              profilePath: typeof profilePathValue === "string" ? profilePathValue : null,
-              knownForDepartment:
-                typeof knownForDepartmentValue === "string" ? knownForDepartmentValue : null,
-            },
-          } satisfies SearchItem,
-        ];
+        accumulator.push({
+          kind: "person",
+          value: {
+            id: item.id,
+            mediaType: "person",
+            name: item.name ?? item.title ?? "Unknown person",
+            profilePath: typeof profilePathValue === "string" ? profilePathValue : null,
+            knownForDepartment:
+              typeof knownForDepartmentValue === "string" ? knownForDepartmentValue : null,
+          },
+        });
+        return accumulator;
       }
 
       const mappedMedia = mapListItemToMedia(item);
-      if (!mappedMedia) {
-        return [];
-      }
-
-      return [
-        {
+      if (mappedMedia) {
+        accumulator.push({
           kind: "media",
           value: mappedMedia,
-        } satisfies SearchItem,
-      ];
-    });
+        });
+      }
+
+      return accumulator;
+    }, []);
 
     return NextResponse.json({
       query,
