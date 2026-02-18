@@ -4,14 +4,16 @@ import { Info, Play } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button";
+import { TrailerDialog } from "@/components/media/trailer-dialog";
 import { getBackdropUrl } from "@/lib/tmdb/images";
 import type { MediaItem } from "@/types/media";
 
 interface BillboardProps {
   item: MediaItem;
+  trailerKey?: string | null;
 }
 
-export const Billboard = ({ item }: BillboardProps) => (
+export const Billboard = ({ item, trailerKey }: BillboardProps) => (
   <section className="relative isolate overflow-hidden rounded-2xl border border-white/10 shadow-card">
     <Image
       src={getBackdropUrl(item.backdropPath, "w1280")}
@@ -39,20 +41,35 @@ export const Billboard = ({ item }: BillboardProps) => (
       </p>
 
       <div className="flex flex-wrap gap-3">
-        <Link
-          href={`/title/${item.mediaType}/${item.id}`}
-          className={buttonClassName({ variant: "primary", size: "lg" })}
-        >
-          <Play className="h-5 w-5 fill-current" />
-          Play
-        </Link>
-        <Link
-          href={`/title/${item.mediaType}/${item.id}`}
-          className={buttonClassName({ variant: "secondary", size: "lg" })}
-        >
-          <Info className="h-5 w-5" />
-          More Info
-        </Link>
+        {trailerKey ? (
+          <>
+            <TrailerDialog youtubeKey={trailerKey} title={item.title} variant="primary" />
+            <Link
+              href={`/title/${item.mediaType}/${item.id}`}
+              className={buttonClassName({ variant: "secondary", size: "lg" })}
+            >
+              <Info className="h-5 w-5" />
+              More Info
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              href={`/title/${item.mediaType}/${item.id}`}
+              className={buttonClassName({ variant: "primary", size: "lg" })}
+            >
+              <Play className="h-5 w-5 fill-current" />
+              Play
+            </Link>
+            <Link
+              href={`/title/${item.mediaType}/${item.id}`}
+              className={buttonClassName({ variant: "secondary", size: "lg" })}
+            >
+              <Info className="h-5 w-5" />
+              More Info
+            </Link>
+          </>
+        )}
       </div>
     </div>
   </section>

@@ -32,7 +32,7 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
 
   return (
     <div className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
-      <Billboard item={data.featured} />
+      <Billboard item={data.featured} trailerKey={data.featuredTrailerKey} />
       {data.rails.map((rail, index) => (
         <MediaRow
           key={rail.id}

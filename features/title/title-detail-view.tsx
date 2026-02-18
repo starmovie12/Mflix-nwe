@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight, ExternalLink } from "lucide-react";
 
 import { CastGrid } from "@/components/media/cast-grid";
 import { MediaRow } from "@/components/media/media-row";
+import { TrailerDialog } from "@/components/media/trailer-dialog";
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -70,6 +71,7 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
   const director = detail.crew.find((member) => member.job === "Director");
   const releaseLabel = formatReleaseDate(detail.releaseDate);
   const runtimeLabel = formatRuntime(detail.runtime);
+  const tmdbUrl = `https://www.themoviedb.org/${detail.mediaType}/${detail.id}`;
 
   return (
     <article className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
@@ -79,10 +81,6 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
       >
         <Link href="/" className="transition hover:text-text-50">
           Home
-        </Link>
-        <ChevronRight className="h-3 w-3" />
-        <Link href={`/${detail.mediaType === "movie" ? "movies" : "tv"}`} className="transition hover:text-text-50">
-          {detail.mediaType === "movie" ? "Movies" : "TV Shows"}
         </Link>
         <ChevronRight className="h-3 w-3" />
         <span className="line-clamp-1 text-text-50">{detail.title}</span>
@@ -125,25 +123,16 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
             <p className="max-w-3xl text-sm text-text-200 md:text-base">{detail.overview}</p>
 
             <div className="flex flex-wrap gap-3">
-              {trailer ? (
-                <a
-                  href={`https://www.youtube.com/watch?v=${trailer.key}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonClassName({ variant: "primary", size: "lg" })}
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  Play Trailer
-                </a>
-              ) : (
-                <Link
-                  href={`/title/${detail.mediaType}/${detail.id}`}
-                  className={buttonClassName({ variant: "primary", size: "lg" })}
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  Play
-                </Link>
-              )}
+              {trailer ? <TrailerDialog youtubeKey={trailer.key} title={detail.title} variant="primary" /> : null}
+              <a
+                href={tmdbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={buttonClassName({ variant: trailer ? "secondary" : "primary", size: "lg" })}
+              >
+                <ExternalLink className="h-5 w-5" />
+                View on TMDB
+              </a>
             </div>
 
             <dl className="grid gap-1 text-xs text-text-400 md:grid-cols-3 md:gap-3 md:text-sm">

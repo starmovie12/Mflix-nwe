@@ -16,6 +16,7 @@ import {
 
 export interface HomePageData {
   featured: MediaItem | null;
+  featuredTrailerKey: string | null;
   rails: MediaRail[];
   hasData: boolean;
   errorMessage: string | null;
@@ -79,10 +80,40 @@ const safeRequest = async <T>(promise: Promise<T>): Promise<SafeRequestResult<T>
   }
 };
 
+export const getMediaDetail = async (
+  mediaType: MediaType,
+  id: number,
+): Promise<MediaDetail | null> => {
+  if (!hasTmdbApiKey()) {
+    return null;
+  }
+
+  if (mediaType === "movie") {
+    const movie = await safeRequest(
+      tmdbRequest({
+        endpoint: tmdbEndpoints.movieDetails(id),
+        schema: tmdbMovieDetailSchema,
+      }),
+    );
+
+    return movie.data ? mapMovieDetail(movie.data) : null;
+  }
+
+  const tvShow = await safeRequest(
+    tmdbRequest({
+      endpoint: tmdbEndpoints.tvDetails(id),
+      schema: tmdbTvDetailSchema,
+    }),
+  );
+
+  return tvShow.data ? mapTvDetail(tvShow.data) : null;
+};
+
 export const getHomePageData = async (): Promise<HomePageData> => {
   if (!hasTmdbApiKey()) {
     return {
       featured: null,
+      featuredTrailerKey: null,
       rails: [],
       hasData: false,
       errorMessage: MISSING_KEY_MESSAGE,
@@ -182,6 +213,11 @@ export const getHomePageData = async (): Promise<HomePageData> => {
 
   const featured = rails.find((rail) => rail.items.length > 0)?.items[0] ?? null;
   const hasData = rails.length > 0;
+  const featuredDetail = featured ? await getMediaDetail(featured.mediaType, featured.id) : null;
+  const featuredTrailerKey =
+    featuredDetail?.videos.find(
+      (video) => video.type.toLowerCase() === "trailer" && video.site.toLowerCase() === "youtube",
+    )?.key ?? null;
 
   const firstRequestError =
     [
@@ -196,39 +232,11 @@ export const getHomePageData = async (): Promise<HomePageData> => {
 
   return {
     featured,
+    featuredTrailerKey,
     rails,
     hasData,
     errorMessage: hasData
       ? null
       : firstRequestError ?? "TMDB data is currently unavailable right now. Please try again in a few moments.",
   };
-};
-
-export const getMediaDetail = async (
-  mediaType: MediaType,
-  id: number,
-): Promise<MediaDetail | null> => {
-  if (!hasTmdbApiKey()) {
-    return null;
-  }
-
-  if (mediaType === "movie") {
-    const movie = await safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.movieDetails(id),
-        schema: tmdbMovieDetailSchema,
-      }),
-    );
-
-    return movie.data ? mapMovieDetail(movie.data) : null;
-  }
-
-  const tvShow = await safeRequest(
-    tmdbRequest({
-      endpoint: tmdbEndpoints.tvDetails(id),
-      schema: tmdbTvDetailSchema,
-    }),
-  );
-
-  return tvShow.data ? mapTvDetail(tvShow.data) : null;
 };
