@@ -45,6 +45,12 @@ const getUserFriendlyTmdbErrorMessage = (error: unknown) => {
     if (/timed out/i.test(error.message)) {
       return "TMDB request timed out. Please retry in a moment.";
     }
+
+    if (/fetch failed/i.test(error.message)) {
+      return "TMDB request failed at runtime (network/API blocked). Verify hosting environment outbound access and TMDB key.";
+    }
+
+    return `TMDB request failed: ${error.message}`;
   }
 
   return "TMDB data is currently unavailable right now. Please try again in a few moments.";

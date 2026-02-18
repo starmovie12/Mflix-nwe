@@ -1,7 +1,7 @@
 import { HomePageView } from "@/features/home/home-page-view";
 import { getHomePageData } from "@/lib/tmdb/service";
 
-export const revalidate = 60 * 10;
+export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
   const data = await getHomePageData();
