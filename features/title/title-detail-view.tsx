@@ -1,15 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight, Play, Tv2 } from "lucide-react";
 
 import { CastGrid } from "@/components/media/cast-grid";
+import { MyListToggleButton } from "@/components/media/my-list-toggle-button";
 import { MediaRow } from "@/components/media/media-row";
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { SectionShell } from "@/components/ui/section-shell";
 import { getBackdropUrl, getPosterUrl } from "@/lib/tmdb/images";
-import type { MediaDetail } from "@/types/media";
+import type { MediaDetail, MediaItem } from "@/types/media";
 
 interface TitleDetailViewProps {
   detail: MediaDetail | null;
@@ -67,6 +68,17 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
   const trailer = detail.videos.find(
     (video) => video.type.toLowerCase() === "trailer" && video.site.toLowerCase() === "youtube",
   );
+  const detailAsMediaItem: MediaItem = {
+    id: detail.id,
+    mediaType: detail.mediaType,
+    title: detail.title,
+    overview: detail.overview,
+    posterPath: detail.posterPath,
+    backdropPath: detail.backdropPath,
+    releaseDate: detail.releaseDate,
+    voteAverage: detail.voteAverage,
+    genreIds: detail.genreIds,
+  };
   const director = detail.crew.find((member) => member.job === "Director");
   const releaseLabel = formatReleaseDate(detail.releaseDate);
   const runtimeLabel = formatRuntime(detail.runtime);
@@ -125,25 +137,25 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
             <p className="max-w-3xl text-sm text-text-200 md:text-base">{detail.overview}</p>
 
             <div className="flex flex-wrap gap-3">
+              <Link
+                href={`/watch/${detail.mediaType}/${detail.id}`}
+                className={buttonClassName({ variant: "primary", size: "lg" })}
+              >
+                <Play className="h-5 w-5 fill-current" />
+                Play
+              </Link>
               {trailer ? (
                 <a
                   href={`https://www.youtube.com/watch?v=${trailer.key}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={buttonClassName({ variant: "primary", size: "lg" })}
+                  className={buttonClassName({ variant: "secondary", size: "lg" })}
                 >
-                  <Play className="h-5 w-5 fill-current" />
-                  Play Trailer
+                  <Tv2 className="h-5 w-5" />
+                  Trailer
                 </a>
-              ) : (
-                <Link
-                  href={`/title/${detail.mediaType}/${detail.id}`}
-                  className={buttonClassName({ variant: "primary", size: "lg" })}
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  Play
-                </Link>
-              )}
+              ) : null}
+              <MyListToggleButton item={detailAsMediaItem} />
             </div>
 
             <dl className="grid gap-1 text-xs text-text-400 md:grid-cols-3 md:gap-3 md:text-sm">

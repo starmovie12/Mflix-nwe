@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { Billboard } from "@/components/media/billboard";
+import { ContinueWatchingRow } from "@/components/media/continue-watching-row";
 import { MediaRow } from "@/components/media/media-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { buttonClassName } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
   return (
     <div className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
       <Billboard item={data.featured} />
+      <ContinueWatchingRow />
       {data.rails.map((rail, index) => (
         <MediaRow
           key={rail.id}

@@ -40,7 +40,7 @@ export const Billboard = ({ item }: BillboardProps) => (
 
       <div className="flex flex-wrap gap-3">
         <Link
-          href={`/title/${item.mediaType}/${item.id}`}
+          href={`/watch/${item.mediaType}/${item.id}`}
           className={buttonClassName({ variant: "primary", size: "lg" })}
         >
           <Play className="h-5 w-5 fill-current" />

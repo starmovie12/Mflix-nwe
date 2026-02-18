@@ -25,6 +25,7 @@ const config: Config = {
         text: {
           50: "#F4F7FF",
           200: "#D3DAEC",
+          300: "#B7C2DB",
           400: "#9CA8C3",
         },
       },

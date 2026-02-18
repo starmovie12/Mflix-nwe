@@ -57,3 +57,11 @@ export interface MediaRail {
   title: string;
   items: MediaItem[];
 }
+
+export interface SearchPerson {
+  id: number;
+  name: string;
+  knownForDepartment: string | null;
+  profilePath: string | null;
+  knownForTitles: string[];
+}

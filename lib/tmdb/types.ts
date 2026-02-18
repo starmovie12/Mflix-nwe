@@ -32,6 +32,10 @@ export const tmdbGenreSchema = z.object({
   name: z.string(),
 });
 
+export const tmdbGenreListSchema = z.object({
+  genres: z.array(tmdbGenreSchema),
+});
+
 export const tmdbVideoSchema = z.object({
   id: z.string(),
   key: z.string(),
@@ -76,6 +80,23 @@ export const tmdbCreditsSchema = z.object({
   crew: z.array(tmdbCrewMemberSchema).default([]),
 });
 
+export const tmdbPersonSearchItemSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    profile_path: nullableString.optional(),
+    known_for_department: z.string().optional(),
+    known_for: z.array(tmdbListItemSchema).optional(),
+  })
+  .passthrough();
+
+export const tmdbPersonSearchSchema = z.object({
+  page: z.number(),
+  results: z.array(tmdbPersonSearchItemSchema),
+  total_pages: z.number(),
+  total_results: z.number(),
+});
+
 const tmdbDetailBaseSchema = z.object({
   id: z.number(),
   overview: z.string().nullable().optional(),
@@ -107,3 +128,4 @@ export const tmdbTvDetailSchema = tmdbDetailBaseSchema.extend({
 export type TmdbPaginatedListResponse = z.infer<typeof tmdbPaginatedListSchema>;
 export type TmdbMovieDetailResponse = z.infer<typeof tmdbMovieDetailSchema>;
 export type TmdbTvDetailResponse = z.infer<typeof tmdbTvDetailSchema>;
+export type TmdbPersonSearchResponse = z.infer<typeof tmdbPersonSearchSchema>;

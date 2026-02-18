@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useReducedMotion } from "framer-motion";
 
 import { Badge } from "@/components/ui/badge";
+import { MyListToggleButton } from "@/components/media/my-list-toggle-button";
 import { cn } from "@/lib/cn";
 import { getBackdropUrl, getPosterUrl } from "@/lib/tmdb/images";
 import type { MediaItem } from "@/types/media";
@@ -13,6 +14,7 @@ interface MediaCardProps {
   item: MediaItem;
   variant?: "poster" | "backdrop";
   className?: string;
+  showMyListToggle?: boolean;
 }
 
 const getReleaseYear = (releaseDate: string | null) => {
@@ -24,7 +26,12 @@ const getReleaseYear = (releaseDate: string | null) => {
   return Number.isNaN(year) ? null : year;
 };
 
-export const MediaCard = ({ item, variant = "poster", className }: MediaCardProps) => {
+export const MediaCard = ({
+  item,
+  variant = "poster",
+  className,
+  showMyListToggle = true,
+}: MediaCardProps) => {
   const shouldReduceMotion = useReducedMotion();
   const imageSrc =
     variant === "poster"
@@ -42,6 +49,11 @@ export const MediaCard = ({ item, variant = "poster", className }: MediaCardProp
       transition={{ type: "spring", stiffness: 240, damping: 22, mass: 0.8 }}
       className={cn("group relative", className)}
     >
+      {showMyListToggle ? (
+        <div className="absolute left-2 top-2 z-20">
+          <MyListToggleButton item={item} />
+        </div>
+      ) : null}
       <Link
         href={`/title/${item.mediaType}/${item.id}`}
         className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400 focus-visible:ring-offset-2 focus-visible:ring-offset-surface-950"

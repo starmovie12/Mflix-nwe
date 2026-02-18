@@ -5,11 +5,13 @@ import type {
   MediaItem,
   MediaType,
   MediaVideo,
+  SearchPerson,
 } from "@/types/media";
 
 import type {
   TmdbMovieDetailResponse,
   TmdbPaginatedListResponse,
+  TmdbPersonSearchResponse,
   TmdbTvDetailResponse,
 } from "./types";
 
@@ -63,6 +65,20 @@ export const mapPaginatedListToMedia = (
   response.results
     .map((item) => mapListItemToMedia(item, fallbackType))
     .filter((item): item is MediaItem => Boolean(item));
+
+export const mapPersonSearchToPeople = (
+  response: TmdbPersonSearchResponse,
+): SearchPerson[] =>
+  response.results.map((person) => ({
+    id: person.id,
+    name: person.name,
+    knownForDepartment: person.known_for_department ?? null,
+    profilePath: person.profile_path ?? null,
+    knownForTitles:
+      person.known_for
+        ?.map((knownForItem) => knownForItem.title ?? knownForItem.name ?? "")
+        .filter((title) => title.length > 0) ?? [],
+  }));
 
 const mapVideos = (
   videos: TmdbMovieDetailResponse["videos"] | TmdbTvDetailResponse["videos"] | undefined,

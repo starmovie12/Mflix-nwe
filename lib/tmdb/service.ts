@@ -1,16 +1,26 @@
-import type { MediaDetail, MediaItem, MediaRail, MediaType } from "@/types/media";
+import type {
+  MediaDetail,
+  MediaItem,
+  MediaRail,
+  MediaType,
+} from "@/types/media";
+import type { SearchCatalogResponse, SearchTab } from "@/types/search";
 import { hasTmdbApiKey } from "@/lib/env";
 
 import { TmdbClientError, tmdbRequest } from "./client";
+import type { TmdbEndpoint } from "./endpoints";
 import { tmdbEndpoints } from "./endpoints";
 import {
   mapMovieDetail,
   mapPaginatedListToMedia,
+  mapPersonSearchToPeople,
   mapTvDetail,
 } from "./mappers";
 import {
+  tmdbGenreListSchema,
   tmdbMovieDetailSchema,
   tmdbPaginatedListSchema,
+  tmdbPersonSearchSchema,
   tmdbTvDetailSchema,
 } from "./types";
 
@@ -21,8 +31,18 @@ export interface HomePageData {
   errorMessage: string | null;
 }
 
+export interface BrowsePageData {
+  rails: MediaRail[];
+  hasData: boolean;
+  errorMessage: string | null;
+}
+
+export type { SearchTab };
+
 const MISSING_KEY_MESSAGE =
   "TMDB_API_KEY is not configured. Add it in .env.local for local development, or in your deployment platform environment variables (Vercel/Netlify).";
+const FALLBACK_TMBD_ERROR =
+  "TMDB data is currently unavailable right now. Please try again in a few moments.";
 
 const getUserFriendlyTmdbErrorMessage = (error: unknown) => {
   if (error instanceof TmdbClientError) {
@@ -57,12 +77,23 @@ const getUserFriendlyTmdbErrorMessage = (error: unknown) => {
     return `TMDB request failed: ${error.message}`;
   }
 
-  return "TMDB data is currently unavailable right now. Please try again in a few moments.";
+  return FALLBACK_TMBD_ERROR;
 };
 
 interface SafeRequestResult<T> {
   data: T | null;
   errorMessage: string | null;
+}
+
+interface RailRequestResult {
+  rail: MediaRail;
+  errorMessage: string | null;
+}
+
+interface RailRequestOptions {
+  fallbackType?: MediaType;
+  filterMediaType?: MediaType;
+  limit?: number;
 }
 
 const safeRequest = async <T>(promise: Promise<T>): Promise<SafeRequestResult<T>> => {
@@ -79,6 +110,84 @@ const safeRequest = async <T>(promise: Promise<T>): Promise<SafeRequestResult<T>
   }
 };
 
+const getFirstError = (errors: Array<string | null>) => errors.find((error) => error) ?? null;
+
+const requestMediaRail = async (
+  id: string,
+  title: string,
+  endpoint: TmdbEndpoint,
+  options: RailRequestOptions = {},
+): Promise<RailRequestResult> => {
+  const response = await safeRequest(
+    tmdbRequest({
+      endpoint,
+      schema: tmdbPaginatedListSchema,
+    }),
+  );
+
+  let items = response.data
+    ? mapPaginatedListToMedia(response.data, options.fallbackType)
+    : [];
+
+  if (options.filterMediaType) {
+    items = items.filter((item) => item.mediaType === options.filterMediaType);
+  }
+
+  if (options.limit && options.limit > 0) {
+    items = items.slice(0, options.limit);
+  }
+
+  return {
+    rail: {
+      id,
+      title,
+      items,
+    },
+    errorMessage: response.errorMessage,
+  };
+};
+
+const requestGenreRails = async (
+  mediaType: MediaType,
+  limit = 2,
+): Promise<{ rails: MediaRail[]; errorMessage: string | null }> => {
+  const genreListResponse = await safeRequest(
+    tmdbRequest({
+      endpoint: mediaType === "movie" ? tmdbEndpoints.movieGenres() : tmdbEndpoints.tvGenres(),
+      schema: tmdbGenreListSchema,
+    }),
+  );
+
+  if (!genreListResponse.data) {
+    return {
+      rails: [],
+      errorMessage: genreListResponse.errorMessage,
+    };
+  }
+
+  const selectedGenres = genreListResponse.data.genres.slice(0, limit);
+
+  const genreRails = await Promise.all(
+    selectedGenres.map((genre) =>
+      requestMediaRail(
+        `${mediaType}-genre-${genre.id}`,
+        `${genre.name} Picks`,
+        mediaType === "movie"
+          ? tmdbEndpoints.discoverMovieByGenre(genre.id)
+          : tmdbEndpoints.discoverTvByGenre(genre.id),
+        {
+          fallbackType: mediaType,
+        },
+      ),
+    ),
+  );
+
+  return {
+    rails: genreRails.map((result) => result.rail).filter((rail) => rail.items.length > 0),
+    errorMessage: getFirstError(genreRails.map((result) => result.errorMessage)),
+  };
+};
+
 export const getHomePageData = async (): Promise<HomePageData> => {
   if (!hasTmdbApiKey()) {
     return {
@@ -89,110 +198,48 @@ export const getHomePageData = async (): Promise<HomePageData> => {
     };
   }
 
-  const [
-    trendingToday,
-    trendingWeek,
-    popularMovies,
-    popularTv,
-    topRated,
-    upcoming,
-    nowPlaying,
-  ] = await Promise.all([
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.trendingToday(),
-        schema: tmdbPaginatedListSchema,
+  const [trendingToday, trendingWeek, popularMovies, popularTv, topRated, nowPlaying, upcoming] =
+    await Promise.all([
+      requestMediaRail("trending-today", "Trending Today", tmdbEndpoints.trendingToday(), {
+        limit: 24,
       }),
-    ),
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.trendingWeek(),
-        schema: tmdbPaginatedListSchema,
+      requestMediaRail("trending-week", "Trending This Week", tmdbEndpoints.trendingWeek(), {
+        limit: 24,
       }),
-    ),
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.popularMovies(),
-        schema: tmdbPaginatedListSchema,
+      requestMediaRail("popular-movies", "Popular Movies", tmdbEndpoints.popularMovies(), {
+        fallbackType: "movie",
+        limit: 24,
       }),
-    ),
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.popularTv(),
-        schema: tmdbPaginatedListSchema,
+      requestMediaRail("popular-tv", "Popular TV", tmdbEndpoints.popularTv(), {
+        fallbackType: "tv",
+        limit: 24,
       }),
-    ),
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.topRated(),
-        schema: tmdbPaginatedListSchema,
+      requestMediaRail("top-rated", "Top Rated", tmdbEndpoints.topRated(), {
+        fallbackType: "movie",
+        limit: 24,
       }),
-    ),
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.upcomingMovies(),
-        schema: tmdbPaginatedListSchema,
+      requestMediaRail("now-playing", "Now Playing", tmdbEndpoints.nowPlayingMovies(), {
+        fallbackType: "movie",
+        limit: 24,
       }),
-    ),
-    safeRequest(
-      tmdbRequest({
-        endpoint: tmdbEndpoints.nowPlayingMovies(),
-        schema: tmdbPaginatedListSchema,
+      requestMediaRail("upcoming", "Upcoming Releases", tmdbEndpoints.upcomingMovies(), {
+        fallbackType: "movie",
+        limit: 24,
       }),
-    ),
-  ]);
+    ]);
 
-  const rails: MediaRail[] = [
-    {
-      id: "trending-today",
-      title: "Trending Today",
-      items: trendingToday.data ? mapPaginatedListToMedia(trendingToday.data) : [],
-    },
-    {
-      id: "trending-week",
-      title: "Trending This Week",
-      items: trendingWeek.data ? mapPaginatedListToMedia(trendingWeek.data) : [],
-    },
-    {
-      id: "popular-movies",
-      title: "Popular Movies",
-      items: popularMovies.data ? mapPaginatedListToMedia(popularMovies.data, "movie") : [],
-    },
-    {
-      id: "popular-tv",
-      title: "Popular TV",
-      items: popularTv.data ? mapPaginatedListToMedia(popularTv.data, "tv") : [],
-    },
-    {
-      id: "top-rated",
-      title: "Top Rated",
-      items: topRated.data ? mapPaginatedListToMedia(topRated.data, "movie") : [],
-    },
-    {
-      id: "now-playing",
-      title: "Now Playing",
-      items: nowPlaying.data ? mapPaginatedListToMedia(nowPlaying.data, "movie") : [],
-    },
-    {
-      id: "upcoming",
-      title: "Upcoming Releases",
-      items: upcoming.data ? mapPaginatedListToMedia(upcoming.data, "movie") : [],
-    },
+  const rails = [
+    trendingToday.rail,
+    trendingWeek.rail,
+    popularMovies.rail,
+    popularTv.rail,
+    topRated.rail,
+    nowPlaying.rail,
+    upcoming.rail,
   ].filter((rail) => rail.items.length > 0);
 
   const featured = rails.find((rail) => rail.items.length > 0)?.items[0] ?? null;
   const hasData = rails.length > 0;
-
-  const firstRequestError =
-    [
-      trendingToday,
-      trendingWeek,
-      popularMovies,
-      popularTv,
-      topRated,
-      upcoming,
-      nowPlaying,
-    ].find((response) => response.errorMessage)?.errorMessage ?? null;
 
   return {
     featured,
@@ -200,7 +247,277 @@ export const getHomePageData = async (): Promise<HomePageData> => {
     hasData,
     errorMessage: hasData
       ? null
-      : firstRequestError ?? "TMDB data is currently unavailable right now. Please try again in a few moments.",
+      : getFirstError([
+          trendingToday.errorMessage,
+          trendingWeek.errorMessage,
+          popularMovies.errorMessage,
+          popularTv.errorMessage,
+          topRated.errorMessage,
+          nowPlaying.errorMessage,
+          upcoming.errorMessage,
+        ]) ?? FALLBACK_TMBD_ERROR,
+  };
+};
+
+export const getMoviesPageData = async (): Promise<BrowsePageData> => {
+  if (!hasTmdbApiKey()) {
+    return {
+      rails: [],
+      hasData: false,
+      errorMessage: MISSING_KEY_MESSAGE,
+    };
+  }
+
+  const [popular, topRated, nowPlaying, upcoming, trending, genreRails] = await Promise.all([
+    requestMediaRail("movies-popular", "Popular Movies", tmdbEndpoints.popularMovies(), {
+      fallbackType: "movie",
+      limit: 30,
+    }),
+    requestMediaRail("movies-top-rated", "Top Rated Movies", tmdbEndpoints.topRated(), {
+      fallbackType: "movie",
+      limit: 30,
+    }),
+    requestMediaRail("movies-now-playing", "Now Playing", tmdbEndpoints.nowPlayingMovies(), {
+      fallbackType: "movie",
+      limit: 30,
+    }),
+    requestMediaRail("movies-upcoming", "Upcoming Movies", tmdbEndpoints.upcomingMovies(), {
+      fallbackType: "movie",
+      limit: 30,
+    }),
+    requestMediaRail("movies-trending", "Trending Movies", tmdbEndpoints.trendingWeek(), {
+      filterMediaType: "movie",
+      limit: 30,
+    }),
+    requestGenreRails("movie", 3),
+  ]);
+
+  const rails = [
+    popular.rail,
+    topRated.rail,
+    nowPlaying.rail,
+    upcoming.rail,
+    trending.rail,
+    ...genreRails.rails,
+  ].filter((rail) => rail.items.length > 0);
+
+  return {
+    rails,
+    hasData: rails.length > 0,
+    errorMessage:
+      rails.length > 0
+        ? null
+        : getFirstError([
+            popular.errorMessage,
+            topRated.errorMessage,
+            nowPlaying.errorMessage,
+            upcoming.errorMessage,
+            trending.errorMessage,
+            genreRails.errorMessage,
+          ]) ?? FALLBACK_TMBD_ERROR,
+  };
+};
+
+export const getTvPageData = async (): Promise<BrowsePageData> => {
+  if (!hasTmdbApiKey()) {
+    return {
+      rails: [],
+      hasData: false,
+      errorMessage: MISSING_KEY_MESSAGE,
+    };
+  }
+
+  const [popular, onTheAir, airingToday, trending, genreRails] = await Promise.all([
+    requestMediaRail("tv-popular", "Popular TV", tmdbEndpoints.popularTv(), {
+      fallbackType: "tv",
+      limit: 30,
+    }),
+    requestMediaRail("tv-on-air", "On The Air", tmdbEndpoints.onTheAirTv(), {
+      fallbackType: "tv",
+      limit: 30,
+    }),
+    requestMediaRail("tv-airing-today", "Airing Today", tmdbEndpoints.airingTodayTv(), {
+      fallbackType: "tv",
+      limit: 30,
+    }),
+    requestMediaRail("tv-trending", "Trending TV", tmdbEndpoints.trendingWeek(), {
+      filterMediaType: "tv",
+      limit: 30,
+    }),
+    requestGenreRails("tv", 3),
+  ]);
+
+  const rails = [
+    popular.rail,
+    onTheAir.rail,
+    airingToday.rail,
+    trending.rail,
+    ...genreRails.rails,
+  ].filter((rail) => rail.items.length > 0);
+
+  return {
+    rails,
+    hasData: rails.length > 0,
+    errorMessage:
+      rails.length > 0
+        ? null
+        : getFirstError([
+            popular.errorMessage,
+            onTheAir.errorMessage,
+            airingToday.errorMessage,
+            trending.errorMessage,
+            genreRails.errorMessage,
+          ]) ?? FALLBACK_TMBD_ERROR,
+  };
+};
+
+export const getNewPopularPageData = async (): Promise<BrowsePageData> => {
+  if (!hasTmdbApiKey()) {
+    return {
+      rails: [],
+      hasData: false,
+      errorMessage: MISSING_KEY_MESSAGE,
+    };
+  }
+
+  const [trendingWeek, upcomingMovies, onTheAir, nowPlaying] = await Promise.all([
+    requestMediaRail("new-trending", "Trending This Week", tmdbEndpoints.trendingWeek(), {
+      limit: 30,
+    }),
+    requestMediaRail("new-upcoming-movies", "Upcoming Movies", tmdbEndpoints.upcomingMovies(), {
+      fallbackType: "movie",
+      limit: 30,
+    }),
+    requestMediaRail("new-on-the-air", "TV On The Air", tmdbEndpoints.onTheAirTv(), {
+      fallbackType: "tv",
+      limit: 30,
+    }),
+    requestMediaRail("new-now-playing", "Now Playing", tmdbEndpoints.nowPlayingMovies(), {
+      fallbackType: "movie",
+      limit: 30,
+    }),
+  ]);
+
+  const rails = [trendingWeek.rail, upcomingMovies.rail, onTheAir.rail, nowPlaying.rail].filter(
+    (rail) => rail.items.length > 0,
+  );
+
+  return {
+    rails,
+    hasData: rails.length > 0,
+    errorMessage:
+      rails.length > 0
+        ? null
+        : getFirstError([
+            trendingWeek.errorMessage,
+            upcomingMovies.errorMessage,
+            onTheAir.errorMessage,
+            nowPlaying.errorMessage,
+          ]) ?? FALLBACK_TMBD_ERROR,
+  };
+};
+
+export const searchCatalog = async (
+  query: string,
+  tab: SearchTab = "all",
+): Promise<SearchCatalogResponse> => {
+  const normalizedQuery = query.trim();
+  if (normalizedQuery.length < 2) {
+    return {
+      media: [],
+      people: [],
+      hasData: false,
+      errorMessage: null,
+    };
+  }
+
+  if (!hasTmdbApiKey()) {
+    return {
+      media: [],
+      people: [],
+      hasData: false,
+      errorMessage: MISSING_KEY_MESSAGE,
+    };
+  }
+
+  if (tab === "movie") {
+    const movieSearch = await safeRequest(
+      tmdbRequest({
+        endpoint: tmdbEndpoints.searchMovie(normalizedQuery),
+        schema: tmdbPaginatedListSchema,
+      }),
+    );
+
+    const media = movieSearch.data ? mapPaginatedListToMedia(movieSearch.data, "movie") : [];
+    return {
+      media,
+      people: [],
+      hasData: media.length > 0,
+      errorMessage: media.length > 0 ? null : movieSearch.errorMessage ?? FALLBACK_TMBD_ERROR,
+    };
+  }
+
+  if (tab === "tv") {
+    const tvSearch = await safeRequest(
+      tmdbRequest({
+        endpoint: tmdbEndpoints.searchTv(normalizedQuery),
+        schema: tmdbPaginatedListSchema,
+      }),
+    );
+
+    const media = tvSearch.data ? mapPaginatedListToMedia(tvSearch.data, "tv") : [];
+    return {
+      media,
+      people: [],
+      hasData: media.length > 0,
+      errorMessage: media.length > 0 ? null : tvSearch.errorMessage ?? FALLBACK_TMBD_ERROR,
+    };
+  }
+
+  if (tab === "person") {
+    const personSearch = await safeRequest(
+      tmdbRequest({
+        endpoint: tmdbEndpoints.searchPerson(normalizedQuery),
+        schema: tmdbPersonSearchSchema,
+      }),
+    );
+
+    const people = personSearch.data ? mapPersonSearchToPeople(personSearch.data) : [];
+    return {
+      media: [],
+      people,
+      hasData: people.length > 0,
+      errorMessage: people.length > 0 ? null : personSearch.errorMessage ?? FALLBACK_TMBD_ERROR,
+    };
+  }
+
+  const [mixedMediaSearch, personSearch] = await Promise.all([
+    safeRequest(
+      tmdbRequest({
+        endpoint: tmdbEndpoints.multiSearch(normalizedQuery),
+        schema: tmdbPaginatedListSchema,
+      }),
+    ),
+    safeRequest(
+      tmdbRequest({
+        endpoint: tmdbEndpoints.searchPerson(normalizedQuery),
+        schema: tmdbPersonSearchSchema,
+      }),
+    ),
+  ]);
+
+  const media = mixedMediaSearch.data ? mapPaginatedListToMedia(mixedMediaSearch.data) : [];
+  const people = personSearch.data ? mapPersonSearchToPeople(personSearch.data) : [];
+  const hasData = media.length > 0 || people.length > 0;
+
+  return {
+    media,
+    people,
+    hasData,
+    errorMessage: hasData
+      ? null
+      : getFirstError([mixedMediaSearch.errorMessage, personSearch.errorMessage]) ??
+        FALLBACK_TMBD_ERROR,
   };
 };
 
