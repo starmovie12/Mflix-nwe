@@ -28,6 +28,15 @@ export interface CrewMember {
   profilePath: string | null;
 }
 
+export interface MediaSeason {
+  id: number;
+  name: string;
+  seasonNumber: number;
+  episodeCount: number;
+  airDate: string | null;
+  posterPath: string | null;
+}
+
 export interface MediaItem {
   id: number;
   mediaType: MediaType;
@@ -45,6 +54,7 @@ export interface MediaDetail extends MediaItem {
   runtime: number | null;
   status: string | null;
   tagline: string | null;
+  seasons: MediaSeason[];
   videos: MediaVideo[];
   cast: CastMember[];
   crew: CrewMember[];

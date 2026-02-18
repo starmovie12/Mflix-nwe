@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import { CastGrid } from "@/components/media/cast-grid";
 import { MediaRow } from "@/components/media/media-row";
+import { TitleActions } from "@/components/media/title-actions";
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -156,27 +157,7 @@ export const TitleDetailView = ({ detail }: TitleDetailViewProps) => {
 
             <p className="max-w-3xl text-sm text-text-200 md:text-base">{detail.overview}</p>
 
-            <div className="flex flex-wrap gap-3">
-              {trailer ? (
-                <a
-                  href={`https://www.youtube.com/watch?v=${trailer.key}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={buttonClassName({ variant: "primary", size: "lg" })}
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  Play Trailer
-                </a>
-              ) : (
-                <Link
-                  href={`/title/${detail.mediaType}/${detail.id}`}
-                  className={buttonClassName({ variant: "primary", size: "lg" })}
-                >
-                  <Play className="h-5 w-5 fill-current" />
-                  Play
-                </Link>
-              )}
-            </div>
+            <TitleActions detail={detail} trailerKey={trailer?.key} />
 
             <dl className="grid gap-1 text-xs text-text-400 md:grid-cols-3 md:gap-3 md:text-sm">
               {releaseLabel ? (

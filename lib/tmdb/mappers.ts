@@ -3,6 +3,7 @@ import type {
   CrewMember,
   MediaDetail,
   MediaItem,
+  MediaSeason,
   MediaType,
   MediaVideo,
 } from "@/types/media";
@@ -98,6 +99,16 @@ const mapCrew = (
     profilePath: member.profile_path ?? null,
   }));
 
+const mapSeasons = (seasons: TmdbTvDetailResponse["seasons"]): MediaSeason[] =>
+  (seasons ?? []).map((season) => ({
+    id: season.id,
+    name: season.name,
+    seasonNumber: season.season_number,
+    episodeCount: season.episode_count ?? 0,
+    airDate: season.air_date ?? null,
+    posterPath: season.poster_path ?? null,
+  }));
+
 export const mapMovieDetail = (movie: TmdbMovieDetailResponse): MediaDetail => ({
   id: movie.id,
   mediaType: "movie",
@@ -112,6 +123,7 @@ export const mapMovieDetail = (movie: TmdbMovieDetailResponse): MediaDetail => (
   runtime: movie.runtime ?? null,
   status: movie.status ?? null,
   tagline: movie.tagline ?? null,
+  seasons: [],
   videos: mapVideos(movie.videos),
   cast: mapCast(movie.credits),
   crew: mapCrew(movie.credits),
@@ -135,6 +147,7 @@ export const mapTvDetail = (tv: TmdbTvDetailResponse): MediaDetail => ({
   runtime: tv.episode_run_time && tv.episode_run_time.length > 0 ? tv.episode_run_time[0] : null,
   status: tv.status ?? null,
   tagline: tv.tagline ?? null,
+  seasons: mapSeasons(tv.seasons),
   videos: mapVideos(tv.videos),
   cast: mapCast(tv.credits),
   crew: mapCrew(tv.credits),
