@@ -1,7 +1,7 @@
 import type { MediaDetail, MediaItem, MediaRail, MediaType } from "@/types/media";
 import { hasTmdbApiKey } from "@/lib/env";
 
-import { tmdbRequest } from "./client";
+import { TmdbClientError, tmdbRequest } from "./client";
 import { tmdbEndpoints } from "./endpoints";
 import {
   mapMovieDetail,
@@ -24,11 +24,48 @@ export interface HomePageData {
 const MISSING_KEY_MESSAGE =
   "TMDB_API_KEY is not configured. Add it in .env.local for local development, or in your deployment platform environment variables (Vercel/Netlify).";
 
-const safeRequest = async <T>(promise: Promise<T>): Promise<T | null> => {
+const getUserFriendlyTmdbErrorMessage = (error: unknown) => {
+  if (error instanceof TmdbClientError) {
+    if (error.status === 401 || /invalid api key/i.test(error.message)) {
+      return "TMDB_API_KEY appears invalid. Use your TMDB v3 API key in environment variables and redeploy.";
+    }
+
+    if (error.status === 429) {
+      return "TMDB rate limit reached. Please retry after a short while.";
+    }
+
+    if (error.status && error.status >= 500) {
+      return "TMDB service is temporarily unavailable. Please try again shortly.";
+    }
+
+    return `TMDB request failed (${error.status ?? "unknown"}).`;
+  }
+
+  if (error instanceof Error) {
+    if (/timed out/i.test(error.message)) {
+      return "TMDB request timed out. Please retry in a moment.";
+    }
+  }
+
+  return "TMDB data is currently unavailable right now. Please try again in a few moments.";
+};
+
+interface SafeRequestResult<T> {
+  data: T | null;
+  errorMessage: string | null;
+}
+
+const safeRequest = async <T>(promise: Promise<T>): Promise<SafeRequestResult<T>> => {
   try {
-    return await promise;
-  } catch {
-    return null;
+    return {
+      data: await promise,
+      errorMessage: null,
+    };
+  } catch (error) {
+    return {
+      data: null,
+      errorMessage: getUserFriendlyTmdbErrorMessage(error),
+    };
   }
 };
 
@@ -99,42 +136,53 @@ export const getHomePageData = async (): Promise<HomePageData> => {
     {
       id: "trending-today",
       title: "Trending Today",
-      items: trendingToday ? mapPaginatedListToMedia(trendingToday) : [],
+      items: trendingToday.data ? mapPaginatedListToMedia(trendingToday.data) : [],
     },
     {
       id: "trending-week",
       title: "Trending This Week",
-      items: trendingWeek ? mapPaginatedListToMedia(trendingWeek) : [],
+      items: trendingWeek.data ? mapPaginatedListToMedia(trendingWeek.data) : [],
     },
     {
       id: "popular-movies",
       title: "Popular Movies",
-      items: popularMovies ? mapPaginatedListToMedia(popularMovies, "movie") : [],
+      items: popularMovies.data ? mapPaginatedListToMedia(popularMovies.data, "movie") : [],
     },
     {
       id: "popular-tv",
       title: "Popular TV",
-      items: popularTv ? mapPaginatedListToMedia(popularTv, "tv") : [],
+      items: popularTv.data ? mapPaginatedListToMedia(popularTv.data, "tv") : [],
     },
     {
       id: "top-rated",
       title: "Top Rated",
-      items: topRated ? mapPaginatedListToMedia(topRated, "movie") : [],
+      items: topRated.data ? mapPaginatedListToMedia(topRated.data, "movie") : [],
     },
     {
       id: "now-playing",
       title: "Now Playing",
-      items: nowPlaying ? mapPaginatedListToMedia(nowPlaying, "movie") : [],
+      items: nowPlaying.data ? mapPaginatedListToMedia(nowPlaying.data, "movie") : [],
     },
     {
       id: "upcoming",
       title: "Upcoming Releases",
-      items: upcoming ? mapPaginatedListToMedia(upcoming, "movie") : [],
+      items: upcoming.data ? mapPaginatedListToMedia(upcoming.data, "movie") : [],
     },
   ].filter((rail) => rail.items.length > 0);
 
   const featured = rails.find((rail) => rail.items.length > 0)?.items[0] ?? null;
   const hasData = rails.length > 0;
+
+  const firstRequestError =
+    [
+      trendingToday,
+      trendingWeek,
+      popularMovies,
+      popularTv,
+      topRated,
+      upcoming,
+      nowPlaying,
+    ].find((response) => response.errorMessage)?.errorMessage ?? null;
 
   return {
     featured,
@@ -142,7 +190,7 @@ export const getHomePageData = async (): Promise<HomePageData> => {
     hasData,
     errorMessage: hasData
       ? null
-      : "TMDB data is currently unavailable right now. Please try again in a few moments.",
+      : firstRequestError ?? "TMDB data is currently unavailable right now. Please try again in a few moments.",
   };
 };
 
@@ -162,7 +210,7 @@ export const getMediaDetail = async (
       }),
     );
 
-    return movie ? mapMovieDetail(movie) : null;
+    return movie.data ? mapMovieDetail(movie.data) : null;
   }
 
   const tvShow = await safeRequest(
@@ -172,5 +220,5 @@ export const getMediaDetail = async (
     }),
   );
 
-  return tvShow ? mapTvDetail(tvShow) : null;
+  return tvShow.data ? mapTvDetail(tvShow.data) : null;
 };
