@@ -10,8 +10,7 @@ export type TmdbImageSize =
   | "w1280"
   | "original";
 
-const TMDB_IMAGE_BASE_URL =
-  process.env.NEXT_PUBLIC_TMDB_IMAGE_BASE_URL ?? "https://image.tmdb.org/t/p";
+const TMDB_IMAGE_BASE_URL = process.env.TMDB_IMAGE_BASE_URL ?? "https://image.tmdb.org/t/p";
 
 export const getTmdbImageUrl = (
   path: string | null | undefined,

@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/cn";
@@ -11,10 +10,35 @@ import { APP_NAME, NAV_ITEMS } from "@/lib/constants";
 export const SiteHeader = () => {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isHidden, setIsHidden] = useState(false);
 
   useEffect(() => {
+    let lastScrollY = 0;
+    let ticking = false;
+
     const onScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (ticking) {
+        return;
+      }
+
+      ticking = true;
+
+      window.requestAnimationFrame(() => {
+        const current = window.scrollY;
+        setIsScrolled(current > 20);
+
+        const delta = current - lastScrollY;
+        const isMovingDown = delta > 0;
+
+        if (current > 88 && isMovingDown && delta > 8) {
+          setIsHidden(true);
+        } else if (!isMovingDown && Math.abs(delta) > 6) {
+          setIsHidden(false);
+        }
+
+        lastScrollY = current;
+        ticking = false;
+      });
     };
 
     onScroll();
@@ -29,6 +53,7 @@ export const SiteHeader = () => {
         isScrolled
           ? "border-b border-white/10 bg-surface-950/95 shadow-card backdrop-blur-xl"
           : "bg-gradient-to-b from-black/70 to-transparent",
+        isHidden ? "-translate-y-full" : "translate-y-0",
       )}
     >
       <div className="app-shell flex h-16 items-center justify-between gap-4">
@@ -54,14 +79,6 @@ export const SiteHeader = () => {
             ))}
           </nav>
         </div>
-
-        <Link
-          href="/search"
-          aria-label="Search titles"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-white/5 text-text-200 transition hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-400"
-        >
-          <Search className="h-4 w-4" />
-        </Link>
       </div>
     </header>
   );
