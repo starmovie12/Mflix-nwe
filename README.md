@@ -59,6 +59,7 @@ npm run dev
   - `lib/tmdb/types.ts`
   - `lib/tmdb/mappers.ts`
   - `lib/tmdb/service.ts`
-- Home page (`/`) with cinematic billboard and horizontal rails
-- Dynamic title detail page (`/title/[mediaType]/[id]`) with metadata, cast, genres, and similar titles
+- TMDB architecture prepared for next pages (genre collections + typed multi-search service)
+- Home page (`/`) with cinematic billboard, Top 10 ranked rail, and horizontal rails
+- Dynamic title detail page (`/title/[mediaType]/[id]`) with metadata, cast, genres, crew highlights, similar titles, and recommendations
 - Global loading, error, not-found, sitemap, and robots foundations
