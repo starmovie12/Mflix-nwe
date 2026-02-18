@@ -27,7 +27,6 @@ Set your TMDB key in `.env.local`:
 TMDB_API_KEY=your_tmdb_api_key_here
 TMDB_BASE_URL=https://api.themoviedb.org/3
 TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
-NEXT_PUBLIC_TMDB_IMAGE_BASE_URL=https://image.tmdb.org/t/p
 NEXT_PUBLIC_APP_NAME=MFLIX
 ```
 
@@ -60,6 +59,7 @@ npm run dev
   - `lib/tmdb/types.ts`
   - `lib/tmdb/mappers.ts`
   - `lib/tmdb/service.ts`
-- Home page (`/`) with cinematic billboard and horizontal rails
-- Dynamic title detail page (`/title/[mediaType]/[id]`) with metadata, cast, genres, and similar titles
+- TMDB architecture prepared for next pages (genre collections + typed multi-search service)
+- Home page (`/`) with cinematic billboard, Top 10 ranked rail, and horizontal rails
+- Dynamic title detail page (`/title/[mediaType]/[id]`) with metadata, cast, genres, crew highlights, similar titles, and recommendations
 - Global loading, error, not-found, sitemap, and robots foundations

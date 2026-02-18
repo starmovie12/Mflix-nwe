@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora } from "next/font/google";
 
+import { ToastProvider } from "@/components/providers/toast-provider";
 import { SiteHeader } from "@/components/layout/site-header";
 import { APP_NAME } from "@/lib/constants";
 
@@ -47,8 +48,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${sora.variable} bg-surface-950 font-sans text-text-50`}>
-        <SiteHeader />
-        {children}
+        <ToastProvider>
+          <SiteHeader />
+          {children}
+        </ToastProvider>
       </body>
     </html>
   );

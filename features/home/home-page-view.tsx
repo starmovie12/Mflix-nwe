@@ -4,6 +4,7 @@ import { Billboard } from "@/components/media/billboard";
 import { MediaRow } from "@/components/media/media-row";
 import { EmptyState } from "@/components/ui/empty-state";
 import { buttonClassName } from "@/components/ui/button";
+import { ContinueWatchingRow } from "@/features/home/continue-watching-row";
 import type { HomePageData } from "@/lib/tmdb/service";
 
 interface HomePageViewProps {
@@ -33,12 +34,14 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
   return (
     <div className="space-y-10 pb-16 pt-20 md:space-y-12 md:pt-24">
       <Billboard item={data.featured} />
+      <ContinueWatchingRow />
       {data.rails.map((rail, index) => (
         <MediaRow
           key={rail.id}
           title={rail.title}
           items={rail.items}
-          variant={index <= 1 ? "backdrop" : "poster"}
+          showRank={rail.id === "top-10"}
+          variant={rail.id === "top-10" ? "poster" : index <= 2 ? "backdrop" : "poster"}
         />
       ))}
     </div>

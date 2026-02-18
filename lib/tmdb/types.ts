@@ -32,6 +32,10 @@ export const tmdbGenreSchema = z.object({
   name: z.string(),
 });
 
+export const tmdbGenreListSchema = z.object({
+  genres: z.array(tmdbGenreSchema).default([]),
+});
+
 export const tmdbVideoSchema = z.object({
   id: z.string(),
   key: z.string(),
@@ -76,6 +80,32 @@ export const tmdbCreditsSchema = z.object({
   crew: z.array(tmdbCrewMemberSchema).default([]),
 });
 
+export const tmdbEpisodeSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    overview: z.string().nullable().optional(),
+    episode_number: z.number(),
+    season_number: z.number(),
+    runtime: z.number().nullable().optional(),
+    still_path: nullableString.optional(),
+    air_date: z.string().optional(),
+  })
+  .passthrough();
+
+export const tmdbSeasonSchema = z
+  .object({
+    id: z.number(),
+    name: z.string(),
+    overview: z.string().nullable().optional(),
+    season_number: z.number(),
+    episode_count: z.number().optional(),
+    air_date: z.string().optional(),
+    poster_path: nullableString.optional(),
+    episodes: z.array(tmdbEpisodeSchema).default([]).optional(),
+  })
+  .passthrough();
+
 const tmdbDetailBaseSchema = z.object({
   id: z.number(),
   overview: z.string().nullable().optional(),
@@ -102,8 +132,10 @@ export const tmdbTvDetailSchema = tmdbDetailBaseSchema.extend({
   name: z.string(),
   first_air_date: z.string().optional(),
   episode_run_time: z.array(z.number()).optional(),
+  seasons: z.array(tmdbSeasonSchema).optional().default([]),
 });
 
 export type TmdbPaginatedListResponse = z.infer<typeof tmdbPaginatedListSchema>;
 export type TmdbMovieDetailResponse = z.infer<typeof tmdbMovieDetailSchema>;
 export type TmdbTvDetailResponse = z.infer<typeof tmdbTvDetailSchema>;
+export type TmdbGenreListResponse = z.infer<typeof tmdbGenreListSchema>;
