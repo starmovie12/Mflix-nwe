@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="MFLIX is a premium OTT discovery experience inspired by Netflix, Prime Video, and Disney+ Hotstar."
+    />
+    <title>MFLIX</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #07090f;
+        --surface: rgba(18, 21, 34, 0.72);
+        --border: rgba(255, 255, 255, 0.1);
+        --text: rgba(255, 255, 255, 0.92);
+        --muted: rgba(255, 255, 255, 0.7);
+        --brand: #e50914;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+      }
+
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          Roboto,
+          Helvetica,
+          Arial,
+          "Apple Color Emoji",
+          "Segoe UI Emoji";
+        color: var(--text);
+        background:
+          radial-gradient(circle at top right, rgba(229, 9, 20, 0.18), transparent 44%),
+          radial-gradient(circle at top left, rgba(39, 60, 98, 0.3), transparent 38%),
+          var(--bg);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      .wrap {
+        min-height: 100%;
+        display: grid;
+        place-items: center;
+        padding: 32px 16px;
+      }
+
+      .card {
+        width: min(860px, 100%);
+        border: 1px solid var(--border);
+        background: var(--surface);
+        backdrop-filter: blur(18px);
+        border-radius: 16px;
+        padding: 28px;
+      }
+
+      .title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0 0 10px;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 12px;
+        height: 12px;
+        border-radius: 999px;
+        background: var(--brand);
+        box-shadow: 0 0 0 6px rgba(229, 9, 20, 0.12);
+      }
+
+      h1 {
+        font-size: 28px;
+        letter-spacing: -0.02em;
+        margin: 0;
+      }
+
+      p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+
+      code {
+        font-family:
+          ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          Monaco,
+          Consolas,
+          "Liberation Mono",
+          "Courier New",
+          monospace;
+        font-size: 0.95em;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 12px;
+        margin-top: 18px;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .btn strong {
+        color: var(--text);
+        font-weight: 650;
+      }
+
+      .btn small {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .cmd {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.22);
+        overflow-x: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <section class="card" role="region" aria-label="MFLIX">
+        <div class="title">
+          <span class="badge" aria-hidden="true"></span>
+          <h1>MFLIX</h1>
+        </div>
+        <p>
+          This repository is a <strong>Next.js</strong> app (App Router). It doesn’t use a static
+          <code>index.html</code> at runtime—start the dev server to view the actual UI.
+        </p>
+
+        <div class="grid" aria-label="Quick start commands">
+          <div class="cmd"><code>npm install</code></div>
+          <div class="cmd"><code>cp .env.example .env.local</code></div>
+          <div class="cmd"><code>npm run dev</code></div>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="./README.md">
+            <span>
+              <strong>Read setup docs</strong><br />
+              <small>Open README.md</small>
+            </span>
+          </a>
+          <a class="btn" href="http://localhost:3000/" rel="nofollow noopener">
+            <span>
+              <strong>Open local app</strong><br />
+              <small>http://localhost:3000</small>
+            </span>
+          </a>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>
