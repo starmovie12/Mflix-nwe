@@ -22,7 +22,7 @@ export interface HomePageData {
 }
 
 const MISSING_KEY_MESSAGE =
-  "TMDB_API_KEY is not configured. Add it in .env.local (local) or Vercel Project Settings -> Environment Variables.";
+  "TMDB_API_KEY is not configured. Add it in .env.local for local development, or in your deployment platform environment variables (Vercel/Netlify).";
 
 const safeRequest = async <T>(promise: Promise<T>): Promise<T | null> => {
   try {

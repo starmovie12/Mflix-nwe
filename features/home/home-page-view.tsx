@@ -18,7 +18,7 @@ export const HomePageView = ({ data }: HomePageViewProps) => {
           title="TMDB connection pending"
           description={
             data.errorMessage ??
-            "Add TMDB credentials to .env.local to populate the cinematic homepage."
+            "Add TMDB credentials in local .env.local or your deployment environment variables to populate the cinematic homepage."
           }
           action={
             <Link href="/" className={buttonClassName({ variant: "secondary" })}>

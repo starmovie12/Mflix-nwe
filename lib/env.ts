@@ -29,7 +29,7 @@ export const requireTmdbApiKey = (): string => {
   const apiKey = env.TMDB_API_KEY;
   if (!apiKey) {
     throw new Error(
-      "TMDB_API_KEY is missing. Add it to .env.local to enable TMDB data fetching.",
+      "TMDB_API_KEY is missing. Add it to .env.local (local) or deployment environment variables (Vercel/Netlify).",
     );
   }
 
