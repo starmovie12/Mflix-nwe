@@ -1,0 +1,13 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#0E1322"/>
+  <rect x="36" y="36" width="1208" height="648" rx="24" fill="url(#paint0_linear)"/>
+  <path d="M270 515L410 355L530 480L680 315L880 515V610H200V515H270Z" fill="#24314C"/>
+  <circle cx="460" cy="232" r="74" fill="#24314C"/>
+  <text x="640" y="640" fill="#9CA8C3" font-family="Arial, sans-serif" font-size="54" font-weight="700" text-anchor="middle">MFLIX</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="640" y1="36" x2="640" y2="684" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1A2033"/>
+      <stop offset="1" stop-color="#121827"/>
+    </linearGradient>
+  </defs>
+</svg>
